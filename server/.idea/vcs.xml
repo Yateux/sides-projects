@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/certifi/gocertifi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/getsentry/raven-go" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/gorilla/handlers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/gorilla/mux" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/gorilla/securecookie" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/k0kubun/pp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/kylelemons/godebug" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/mattn/go-colorable" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/mattn/go-isatty" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/github.com/rs/cors" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/golang.org/x/crypto" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/_vendor/src/gopkg.in/mgo.v2" vcs="Git" />
+  </component>
+</project>
