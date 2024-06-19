@@ -1,36 +1,38 @@
+import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 
 export default class DetailsPlugin extends Plugin {
-  static get requires() {
-    return [Command]; // Required for creating commands
-  }
+    init() {
+        const editor = this.editor;
 
-  init() {
-    const editor = this.editor;
+        // Adding the button to the toolbar
+        editor.ui.componentFactory.add('insertDetails', locale => {
+            const view = new ButtonView(locale);
 
-    // Define a command to insert the details element
-    editor.commands.add('insertDetails', new InsertDetailsCommand(editor));
-  }
-}
+            view.set({
+                label: 'Insert Details',
+                withText: true,
+                tooltip: true
+            });
 
-class InsertDetailsCommand extends Command {
-  constructor(editor) {
-    super(editor);
-  }
+            // Execute the callback when the button is clicked
+            view.on('execute', () => {
+                const detailsHtml = `
+                    <details>
+                        <summary>I have keys but no doors. I have space but no room. You can enter but can’t leave. What am I?</summary>
+                        A keyboard.
+                    </details>
+                `;
 
-  execute() {
-    const editor = this.editor;
-    const selection = editor.model.document.selection;
-    const range = selection.getFirstRange();
+                // Insert the HTML into the editor's data
+                editor.model.change(writer => {
+                    const viewFragment = editor.data.processor.toView(detailsHtml);
+                    const modelFragment = editor.data.toModel(viewFragment);
+                    editor.model.insertContent(modelFragment);
+                });
+            });
 
-    editor.model.change((writer) => {
-      const detailsElement = writer.createElement('details');
-      const summaryElement = writer.createElement('summary');
-
-      // Set default summary text if desired
-      writer.insertText('Enter your summary text here', summaryElement);
-
-      writer.appendElement(summaryElement, detailsElement);
-      writer.insertElement(detailsElement, range.positionAfter);
-    });
-  }
+            return view;
+        });
+    }
 }
