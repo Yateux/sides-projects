@@ -1,93 +1,36 @@
-import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
-import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
-import { toWidget, toWidgetEditable } from '@ckeditor/ckeditor5-widget/src/utils';
-import Widget from '@ckeditor/ckeditor5-widget/src/widget';
 
 export default class DetailsPlugin extends Plugin {
-    static get requires() {
-        return [ Widget ];
-    }
+  static get requires() {
+    return [Command]; // Required for creating commands
+  }
 
-    init() {
-        const editor = this.editor;
+  init() {
+    const editor = this.editor;
 
-        // Schema definition
-        editor.model.schema.register('details', {
-            isObject: true,
-            allowWhere: '$block',
-            allowContentOf: '$root'
-        });
+    // Define a command to insert the details element
+    editor.commands.add('insertDetails', new InsertDetailsCommand(editor));
+  }
+}
 
-        editor.model.schema.register('summary', {
-            isLimit: true,
-            allowIn: 'details',
-            allowContentOf: '$block'
-        });
+class InsertDetailsCommand extends Command {
+  constructor(editor) {
+    super(editor);
+  }
 
-        editor.conversion.for('upcast').elementToElement({
-            model: 'details',
-            view: 'details'
-        });
+  execute() {
+    const editor = this.editor;
+    const selection = editor.model.document.selection;
+    const range = selection.getFirstRange();
 
-        editor.conversion.for('dataDowncast').elementToElement({
-            model: 'details',
-            view: 'details'
-        });
+    editor.model.change((writer) => {
+      const detailsElement = writer.createElement('details');
+      const summaryElement = writer.createElement('summary');
 
-        editor.conversion.for('editingDowncast').elementToElement({
-            model: 'details',
-            view: (modelItem, viewWriter) => {
-                const detailsElement = viewWriter.createContainerElement('details');
-                return toWidget(detailsElement, viewWriter, { label: 'details widget' });
-            }
-        });
+      // Set default summary text if desired
+      writer.insertText('Enter your summary text here', summaryElement);
 
-        editor.conversion.for('upcast').elementToElement({
-            model: 'summary',
-            view: 'summary'
-        });
-
-        editor.conversion.for('dataDowncast').elementToElement({
-            model: 'summary',
-            view: 'summary'
-        });
-
-        editor.conversion.for('editingDowncast').elementToElement({
-            model: 'summary',
-            view: (modelItem, viewWriter) => {
-                const summaryElement = viewWriter.createEditableElement('summary');
-                return toWidgetEditable(summaryElement, viewWriter);
-            }
-        });
-
-        // Adding the button to the toolbar
-        editor.ui.componentFactory.add('insertDetails', locale => {
-            const view = new ButtonView(locale);
-
-            view.set({
-                label: 'Insert Details',
-                withText: true,
-                tooltip: true
-            });
-
-            // Insert details with a summary and a paragraph
-            view.on('execute', () => {
-                editor.model.change(writer => {
-                    const details = writer.createElement('details');
-                    const summary = writer.createElement('summary');
-                    const paragraph = writer.createElement('paragraph');
-
-                    writer.append(summary, details);
-                    writer.append(paragraph, details);
-
-                    writer.insertText('I have keys but no doors. I have space but no room. You can enter but can’t leave. What am I?', summary);
-                    writer.insertText('A keyboard.', paragraph);
-
-                    editor.model.insertContent(details, editor.model.document.selection);
-                });
-            });
-
-            return view;
-        });
-    }
+      writer.appendElement(summaryElement, detailsElement);
+      writer.insertElement(detailsElement, range.positionAfter);
+    });
+  }
 }
