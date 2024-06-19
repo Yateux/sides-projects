@@ -46,5 +46,20 @@ export default class DetailsPlugin extends Plugin {
                 data.preventDefault();
             }
         }, { priority: 'high' });
+
+        // Ajouter le gestionnaire de clavier pour créer un paragraphe en dehors du <details> lorsque "Entrée" est pressé
+        editor.editing.view.document.on('enter', (evt, data) => {
+            const selection = editor.model.document.selection;
+            const position = selection.getFirstPosition();
+
+            if (position.parent.is('element', 'details') && position.isAtEnd) {
+                const paragraph = editor.model.change(writer => writer.createElement('paragraph'));
+                const parentPosition = editor.model.createPositionAfter(position.parent);
+                editor.model.insertContent(paragraph, parentPosition);
+                editor.model.change(writer => writer.setSelection(paragraph, 'in'));
+                evt.stop();
+                data.preventDefault();
+            }
+        }, { priority: 'high' });
     }
 }
