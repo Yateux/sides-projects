@@ -1,49 +1,50 @@
+const fs = require('fs');
+const path = require('path');
+const yaml = require('yaml');
 
-function readMarkdownFile(filePath) {
-    try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        console.log(`\nContent of ${filePath}:\n`, content);
-    } catch (err) {
-        console.error(`Error reading file ${filePath}:`, err);
-    }
-}
+// Chargez et parsez le fichier YAML
+const yamlFile = fs.readFileSync('path/to/your/file.yaml', 'utf8');
+const parsedYaml = yaml.parse(yamlFile);
 
-// Fonction pour traiter le fichier YAML et lire les fichiers .md associés
-function processYaml(yamlFilePath) {
-    try {
-        const fileContent = fs.readFileSync(yamlFilePath, 'utf8');
-        const data = yaml.load(fileContent);
+// Fonction pour lire les fichiers .md et identifier les catégories
+const readMdFilesAndIdentifyCategories = (nav) => {
+    const stack = [...nav]; // Utilisez une pile pour gérer les niveaux de profondeur
 
-        if (data.nav) {
-            const stack = [...data.nav];  // Utilisation d'une pile pour le traitement non récursif
+    while (stack.length > 0) {
+        const item = stack.pop();
 
-            while (stack.length > 0) {
-                const item = stack.pop();
-
-                if (typeof item === 'object') {
-                    const key = Object.keys(item)[0];
-                    const value = item[key];
-
-                    if (typeof value === 'string') {
-                        const filePath = path.join(path.dirname(yamlFilePath), value);
-                        readMarkdownFile(filePath);
-                    } else if (Array.isArray(value)) {
-                        stack.push(...value);
-                    } else if (typeof value === 'object') {
-                        stack.push(value);
-                    }
+        if (typeof item === 'string') {
+            // C'est un fichier .md
+            if (item.endsWith('.md')) {
+                const filePath = path.resolve(__dirname, item);
+                if (fs.existsSync(filePath)) {
+                    const content = fs.readFileSync(filePath, 'utf8');
+                    console.log(`Content of ${item}:`);
+                    console.log(content);
+                } else {
+                    console.log(`File not found: ${item}`);
                 }
             }
-        } else {
-            console.error('No "nav" key found in YAML.');
+        } else if (typeof item === 'object') {
+            // C'est un objet avec des sous-éléments
+            for (const [key, value] of Object.entries(item)) {
+                if (typeof value === 'string') {
+                    if (value.endsWith('.md')) {
+                        stack.push(value);
+                    } else {
+                        console.log(`Category: ${key}`);
+                    }
+                } else if (Array.isArray(value)) {
+                    console.log(`Category: ${key}`);
+                    stack.push(...value.reverse()); // Inversez pour maintenir l'ordre de parcours
+                } else if (typeof value === 'object') {
+                    console.log(`Category: ${key}`);
+                    stack.push(value);
+                }
+            }
         }
-    } catch (err) {
-        console.error(`Error reading YAML file ${yamlFilePath}:`, err);
     }
-}
+};
 
-// Chemin vers votre fichier YAML
-const yamlFilePath = 'path/to/your/file.yaml';
-
-// Lire et traiter le fichier YAML
-processYaml(yamlFilePath);
+// Parcourez le nav et lisez les fichiers .md
+readMdFilesAndIdentifyCategories(parsedYaml.nav);
