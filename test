@@ -1,1 +1,49 @@
 
+function readMarkdownFile(filePath) {
+    try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        console.log(`\nContent of ${filePath}:\n`, content);
+    } catch (err) {
+        console.error(`Error reading file ${filePath}:`, err);
+    }
+}
+
+// Fonction pour traiter le fichier YAML et lire les fichiers .md associés
+function processYaml(yamlFilePath) {
+    try {
+        const fileContent = fs.readFileSync(yamlFilePath, 'utf8');
+        const data = yaml.load(fileContent);
+
+        if (data.nav) {
+            const stack = [...data.nav];  // Utilisation d'une pile pour le traitement non récursif
+
+            while (stack.length > 0) {
+                const item = stack.pop();
+
+                if (typeof item === 'object') {
+                    const key = Object.keys(item)[0];
+                    const value = item[key];
+
+                    if (typeof value === 'string') {
+                        const filePath = path.join(path.dirname(yamlFilePath), value);
+                        readMarkdownFile(filePath);
+                    } else if (Array.isArray(value)) {
+                        stack.push(...value);
+                    } else if (typeof value === 'object') {
+                        stack.push(value);
+                    }
+                }
+            }
+        } else {
+            console.error('No "nav" key found in YAML.');
+        }
+    } catch (err) {
+        console.error(`Error reading YAML file ${yamlFilePath}:`, err);
+    }
+}
+
+// Chemin vers votre fichier YAML
+const yamlFilePath = 'path/to/your/file.yaml';
+
+// Lire et traiter le fichier YAML
+processYaml(yamlFilePath);
